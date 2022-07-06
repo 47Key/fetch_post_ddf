@@ -1,11 +1,11 @@
 import fetch from "node-fetch";
 
 var id = 1;
-const url = "https://us-central1-key47-51636.cloudfunctions.net/app/login";
-const db = "https://key47-51636.firebaseio.com/Properties.json";
+const loginUrl = "https://us-central1-key47-51636.cloudfunctions.net/app/login";
+// const db = "https://key47-51636.firebaseio.com/Properties.json";
 
 async function login() {
-    const login = await fetch(url, {
+    const login = await fetch(loginUrl, {
         method: "GET",
         mode: "cors",
         cache: "force-cache",

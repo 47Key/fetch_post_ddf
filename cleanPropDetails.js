@@ -34,7 +34,7 @@ async function cleanData() {
     cleanJson.listingId = dataBase[0].ListingID
     console.log(cleanJson);
 
-    const db = `https://key47-51636.firebaseio.com/PropertyMin/${id}.json`;
+    const db = `https://key47-51636.firebaseio.com/PropertyGrid/${id}.json`;
     const put = await fetch(db, {
         method: "PUT",
         body: cleanJson,
