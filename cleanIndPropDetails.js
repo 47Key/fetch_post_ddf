@@ -11,7 +11,7 @@ async function cleanData() {
         credentials: "same-origin",
     })
     .catch((error) => {
-        console.error("Error:", error); // change to , when finished testing
+        console.error("Error:", error); // change to ","
         // cleanData();
     });  
     
@@ -35,12 +35,11 @@ async function cleanData() {
     cleanJson.bedroomsTotal = dataBase[0].Building.BedroomsTotal;
     cleanJson.bathroomsTotal = dataBase[0].Building.BathroomTotal;
     cleanJson.listingId = dataBase[0].ListingID;
-    console.log(cleanJson);
  
     const db = `https://key47-51636.firebaseio.com/PropertyGrid/${id}.json`;
     const put = await fetch(db, {
         method: "PUT",
-        body: cleanJson,
+        body: JSON.stringify(cleanJson),
     })
     .then(response => response.json())
     .then(data => {
@@ -49,8 +48,6 @@ async function cleanData() {
     .catch((error) => {
     console.error("Error:", error);
     });
-    console.log(put);
-
 
 ////////////////////////////////////////////////////////////////
 ///////////////// Individual Property Details //////////////////
@@ -79,16 +76,13 @@ async function cleanData() {
     cleanJson.zoning = dataBase[0].ZoningDescription;
     cleanJson.mainPhoto = dataBase[0].Photo.PropertyPhoto[0].LargePhotoURL;
     
-    
-    //////// Need to optimize the fetching of largephotoURL, instead of pulling all pictures  ////////
-    cleanJson.otherPhotos = dataBase[0].Photo.PropertyPhoto.LargePhotoURL;
-    console.log(cleanJson);
-
+    const filterOtherPhotos = dataBase[0].Photo.PropertyPhoto.map((photos) => photos.LargePhotoURL);
+    cleanJson.otherPhotos = filterOtherPhotos;
 
     const dbFull = `https://key47-51636.firebaseio.com/IndividualProperty/${id}.json`;
     const putFull = await fetch(dbFull, {
         method: "PUT",
-        body: cleanJson,
+        body: JSON.stringify(cleanJson),
     })
     .then(response => response.json())
     .then(data => {
@@ -97,8 +91,6 @@ async function cleanData() {
     .catch((error) => {
     console.error("Error:", error);
     });
-    console.log(putFull);
-
 }
 
 cleanData();
