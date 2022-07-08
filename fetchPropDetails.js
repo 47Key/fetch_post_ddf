@@ -1,10 +1,16 @@
 import fetch from "node-fetch";
 
-var id = 1;
-const url = "https://us-central1-key47-51636.cloudfunctions.net/app/login";
+
+////////////////////////////////////////////////////////////////
+//////////////////// Login to RETS Server //////////////////////
+////////////////////////////////////////////////////////////////
+
+// Initial login to the RETS server to perform additional queries
+
+const loginUrl = "https://us-central1-key47-51636.cloudfunctions.net/app/login";
 
 async function login() {
-    const login = await fetch(url, {
+    const login = await fetch(loginUrl, {
         method: "GET",
         mode: "cors",
         cache: "force-cache",
@@ -15,6 +21,43 @@ async function login() {
 }
 
 login();
+
+
+////////////////////////////////////////////////////////////////
+///////////////////// Fetch Property ID's //////////////////////
+////////////////////////////////////////////////////////////////
+
+// Fetches all of the ID's of active MLS listings for that day
+
+const idUrl = "https://us-central1-key47-51636.cloudfunctions.net/app/";
+const db = "https://key47-51636.firebaseio.com/PropertyID.json";
+
+async function fetchDdf() {
+    const response = await fetch(idUrl);
+    const data = await response.text();
+    const push = await fetch(db, {
+        method: "PUT",
+        body: JSON.parse(JSON.stringify(data)),
+    })
+    .then(response => response.json())
+    .then(data => {
+    console.log ("Success:", data);
+    })
+    .catch((error) => {
+    console.error("Error:", error);
+    });
+}
+
+fetchDdf();
+
+
+////////////////////////////////////////////////////////////////
+//////////////////// Fetch Property Details ////////////////////
+////////////////////////////////////////////////////////////////
+
+// Takes the ID's from the previous function, and fetches all of the data on that property
+
+var id = 1;
 
 async function search() {
     id++;
@@ -39,21 +82,25 @@ async function search() {
         console.error("Error:", error),
         search();
     });
+    
     const searchResponse = await searchId.text();
-    if (searchREsponse == null) {
+    if (searchResponse == null) {
         search();
     }
 
     const parseData = JSON.parse(searchResponse);
-    const dataBase = parseData.records;
 
-    const cleanJson = {};
 
 ////////////////////////////////////////////////////////////////
 /////////////////// Property Grid Details //////////////////////
 ////////////////////////////////////////////////////////////////
-// Initializing basic json for property grid, to minimize the amount of data needed to be rendered on the website
 
+// Initializing basic json for property grid, to minimize the amount of data needed to be rendered on the website
+// Continuation of Search function, but split into 3 sections for better organization
+
+    const dataBase = parseData.records;
+
+    const cleanJson = {};
 
     cleanJson.photo = dataBase[0].Photo.PropertyPhoto[0].PhotoURL;
     cleanJson.city = dataBase[0].Address.City;
@@ -80,8 +127,9 @@ async function search() {
 ////////////////////////////////////////////////////////////////
 ///////////////// Individual Property Details //////////////////
 ////////////////////////////////////////////////////////////////
-// Initializing more advanced JSON to provide more detailed information about a property once that particular property is selected
 
+// Initializing more advanced JSON to provide more detailed information about a property once that particular property is selected
+// Continuation of Search function, but split into 2 sections for better organization
 
     cleanJson.description = dataBase[0].PublicRemarks;
     cleanJson.buildingSqFt = dataBase[0].Building.TotalFinishedArea;
@@ -106,7 +154,7 @@ async function search() {
     cleanJson.zoning = dataBase[0].ZoningDescription;
     cleanJson.mainPhoto = dataBase[0].Photo.PropertyPhoto[0].LargePhotoURL;
 
-    const filterOtherPhotos = dataBase[0].Photo.PropertyPhoto.map((photos) => photos.LargePhotoURL);
+    const filterOtherPhotos = dataBase[0].Photo.PropertyPhoto.map((photos) => photos.LargePhotoURL); // filter LargePhotoUrl out of larger object, to minimize size of data rendered on the website
     cleanJson.otherPhotos = filterOtherPhotos;
 
     const dbFull = `https://key47-51636.firebaseio.com/IndividualProperty/${id}.json`;
