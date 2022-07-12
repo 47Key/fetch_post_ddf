@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 
 // Initial login to the RETS server to perform additional queries
 
-const loginUrl = "https://us-central1-key47-51636.cloudfunctions.net/app/login";
+const loginUrl = "https://app-whfampdoga-uc.a.run.app/login";
 
 async function login() {
     const login = await fetch(loginUrl, {
@@ -15,9 +15,11 @@ async function login() {
         mode: "cors",
         cache: "force-cache",
         credentials: "include",
+        connection: "keep-alive",
+
     });
     console.log(login);
-    return search();
+    return fetchDdf();
 }
 
 login();
@@ -29,23 +31,24 @@ login();
 
 // Fetches all of the ID's of active MLS listings for that day
 
-const idUrl = "https://us-central1-key47-51636.cloudfunctions.net/app/";
-const db = "https://key47-51636.firebaseio.com/PropertyID.json";
+const idUrl = "https://app-whfampdoga-uc.a.run.app/";
+const db = "https://teamforcier-default-rtdb.firebaseio.com/PropertyID.json";
 
 async function fetchDdf() {
     const response = await fetch(idUrl);
-    const data = await response.text();
+    const data = await response.records.map(response => response._XmlAttributes.ID);
     const push = await fetch(db, {
         method: "PUT",
-        body: JSON.parse(JSON.stringify(data)),
+        body: JSON.stringify(data),
     })
     .then(response => response.json())
     .then(data => {
-    console.log ("Success:", data);
+    console.log ("Fetch ID Success:", data);
     })
     .catch((error) => {
-    console.error("Error:", error);
+    console.error("Fetch ID Error:", error);
     });
+    return search();
 }
 
 fetchDdf();
@@ -61,25 +64,25 @@ var id = 1;
 
 async function search() {
     id++;
-    const response = await fetch(`https://key47-51636.firebaseio.com/PropertyID/records/${id}/_XmlAttributes/ID.json`, {
+    const response = await fetch(`https://teamforcier-default-rtdb.firebaseio.com/PropertyID/records/${id}/_XmlAttributes/ID.json`, {
         method: "GET",
         mode: "cors",           
         cache: "force-cache",
         credentials: "same-origin",
     })
     .catch((error) => {
-        console.error("Error:", error),
+        console.error("Search Error:", error),
         search();
     });  
     const data = await response.json();
-    const searchId = await fetch(`https://us-central1-key47-51636.cloudfunctions.net/app/${data}`, {
+    const searchId = await fetch(`https://app-whfampdoga-uc.a.run.app/${data}`, {
         method: "GET",
         mode: "cors",           
         cache: "force-cache",
         credentials: "same-origin",
     })
     .catch((error) => {
-        console.error("Error:", error),
+        console.error("DDF Search Error:", error),
         search();
     });
     
@@ -110,17 +113,17 @@ async function search() {
     cleanJson.bathroomsTotal = dataBase[0].Building.BathroomTotal;
     cleanJson.listingId = dataBase[0].ListingID;
 
-    const dbPartial = `https://key47-51636.firebaseio.com/PropertyGrid/${id}.json`;
+    const dbPartial = `https://teamforcier-default-rtdb.firebaseio.com/PropertyGrid/${id}.json`;
     const put = await fetch(dbPartial, {
         method: "PUT",
         body: JSON.stringify(cleanJson),
     })
     .then(response => response.json())
     .then(data => {
-    console.log ("Success:", data);
+    console.log ("Prop Grid Success:", data);
     })
     .catch((error) => {
-    console.error("Error:", error);
+    console.error("Prop Grid Error:", error);
     });
 
 
@@ -157,17 +160,17 @@ async function search() {
     const filterOtherPhotos = dataBase[0].Photo.PropertyPhoto.map((photos) => photos.LargePhotoURL); // filter LargePhotoUrl out of larger object, to minimize size of data rendered on the website
     cleanJson.otherPhotos = filterOtherPhotos;
 
-    const dbFull = `https://key47-51636.firebaseio.com/IndividualProperty/${id}.json`;
+    const dbFull = `https://teamforcier-default-rtdb.firebaseio.com/IndividualProperty/${id}.json`;
     const putFull = await fetch(dbFull, {
         method: "PUT",
         body: JSON.stringify(cleanJson),
     })
     .then(response => response.json())
     .then(data => {
-    console.log ("Success:", data);
+    console.log ("Ind Prop Success:", data);
     })
     .catch((error) => {
-    console.error("Error:", error);
+    console.error("Ind Prop Error:", error);
     });
 
 
