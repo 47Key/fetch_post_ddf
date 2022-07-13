@@ -62,7 +62,7 @@ fetchDdf();
 
 // Takes the ID's from the previous function, and fetches all of the data on that property
 
-var id = 66;
+var id = 1;
 
 async function search() {
     id++;
@@ -119,14 +119,14 @@ async function search() {
         return search();
     }
         
-        const dbPartial = `https://teamforcier-default-rtdb.firebaseio.com/PropertyGrid/${id}.json`;
-        const put = await fetch(dbPartial, {
-            method: "PUT",
-            body: JSON.stringify(cleanJson),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log ("Prop Grid Success:", data);
+    const dbPartial = `https://teamforcier-default-rtdb.firebaseio.com/PropertyGrid/${id}.json`;
+    const put = await fetch(dbPartial, {
+        method: "PUT",
+        body: JSON.stringify(cleanJson),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log ("Prop Grid Success:", data);
     })
     .catch((error) => {
     console.error("Prop Grid Error:", error);
@@ -169,13 +169,13 @@ async function search() {
         return search();
     }
 
-        const dbFull = `https://teamforcier-default-rtdb.firebaseio.com/IndividualProperty/${id}.json`;
-        const putFull = await fetch(dbFull, {
-            method: "PUT",
-            body: JSON.stringify(cleanJson),
-        })
-        .then(response => response.json())
-        .then(data => {
+    const dbFull = `https://teamforcier-default-rtdb.firebaseio.com/IndividualProperty/${id}.json`;
+    const putFull = await fetch(dbFull, {
+        method: "PUT",
+        body: JSON.stringify(cleanJson),
+    })
+    .then(response => response.json())
+    .then(data => {
             console.log ("Ind Prop Success:", data);
     })
     .catch((error) => {
