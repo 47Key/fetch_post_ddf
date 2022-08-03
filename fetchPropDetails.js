@@ -6,21 +6,21 @@ import fetch from "node-fetch";
 
 // Initial login to the RETS server to perform additional queries
 
-const loginUrl = "https://app-whfampdoga-uc.a.run.app/login";
+// const loginUrl = "https://app-whfampdoga-uc.a.run.app/login";
 
-async function login() {
-  const login = await fetch(loginUrl, {
-    method: "GET",
-    mode: "cors",
-    cache: "force-cache",
-    credentials: "include",
-    connection: "keep-alive",
-  });
-  console.log(login);
-  return fetchDdf();
-}
+// async function login() {
+//   const login = await fetch(loginUrl, {
+//     method: "GET",
+//     mode: "cors",
+//     cache: "force-cache",
+//     credentials: "include",
+//     connection: "keep-alive",
+//   });
+//   console.log(login);
+//   return fetchDdf();
+// }
 
-login();
+// login();
 
 ////////////////////////////////////////////////////////////////
 ///////////////////// Fetch Property ID's //////////////////////
@@ -28,29 +28,29 @@ login();
 
 // Fetches all of the ID's of active MLS listings for that day
 
-const idUrl = "https://app-whfampdoga-uc.a.run.app/";
-const db = "https://teamforcier-default-rtdb.firebaseio.com/PropertyID.json";
+// const idUrl = "https://app-whfampdoga-uc.a.run.app/";
+// const db = "https://teamforcier-default-rtdb.firebaseio.com/PropertyID.json";
 
-async function fetchDdf() {
-  const response = await fetch(idUrl);
-  const preData = await response.json();
-  const data = preData.records.map((value) => value._XmlAttributes.ID);
-  console.log(data);
-  const push = await fetch(db, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Fetch ID Success:", data);
-    })
-    .catch((error) => {
-      console.error("Fetch ID Error:", error);
-    });
-  return search();
-}
+// async function fetchDdf() {
+//   const response = await fetch(idUrl);
+//   const preData = await response.json();
+//   const data = preData.records.map((value) => value._XmlAttributes.ID);
+//   console.log(data);
+//   const push = await fetch(db, {
+//     method: "PUT",
+//     body: JSON.stringify(data),
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       console.log("Fetch ID Success:", data);
+//     })
+//     .catch((error) => {
+//       console.error("Fetch ID Error:", error);
+//     });
+//   return search();
+// }
 
-fetchDdf();
+// fetchDdf();
 
 ////////////////////////////////////////////////////////////////
 //////////////////// Fetch Property Details ////////////////////
@@ -58,10 +58,11 @@ fetchDdf();
 
 // Takes the ID's from the previous function, and fetches all of the data on that property
 
-var id = 1;
+var id = 61;
 
 async function search() {
   id++;
+try {
   const response = await fetch(
     `https://teamforcier-default-rtdb.firebaseio.com/PropertyID/${id}.json`,
     {
@@ -165,23 +166,30 @@ async function search() {
   }
 
   const dbFull = `https://teamforcier-default-rtdb.firebaseio.com/IndividualProperty/${id}.json`;
-  const putFull = await fetch(dbFull, {
-    method: "PUT",
-    body: JSON.stringify(cleanJson),
-  })
+  try {
+    const putFull = await fetch(dbFull, {
+      method: "PUT",
+      body: JSON.stringify(cleanJson),
+    })
     .then((response) => response.json())
     .then((data) => {
       console.log("Ind Prop Success:", data);
     })
     .catch((error) => {
       console.error("Ind Prop Error:", error);
-    });
+  }); 
+  } catch (error) {
+    return search();
+  }
 
   if(id >= 300) {
     return logout();
+  } else {
+    return search();
   }
-
+} catch (error) {
   return search();
+  }
 }
 
 search();
